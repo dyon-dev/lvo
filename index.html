@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>kamu sayang aku ga?</title>
+<style>
+  :root{
+    --pink-1:#ffe4ec;
+    --pink-2:#ffc2d6;
+    --pink-3:#ff9ebb;
+    --pink-4:#ff6fa5;
+    --blush:#fff0f5;
+    --white:#ffffff;
+    --text:#8a4a63;
+    --shadow-color: rgba(255,111,165,0.35);
+  }
+
+  *{
+    box-sizing:border-box;
+  }
+
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden; /* no weird scrollbars ever */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body{
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 30% 20%, var(--pink-1), var(--blush) 60%, var(--white) 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  /* soft floating decorative blobs for depth, subtle not busy */
+  .blob{
+    position:fixed;
+    border-radius:50%;
+    filter: blur(40px);
+    opacity:0.35;
+    pointer-events:none;
+    z-index:0;
+  }
+  .blob1{ width:220px; height:220px; background:var(--pink-2); top:-60px; left:-60px; }
+  .blob2{ width:260px; height:260px; background:var(--pink-3); bottom:-80px; right:-80px; }
+
+  .screen{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    width:100%;
+    height:100%;
+    padding: 24px;
+    transition: opacity 0.5s ease;
+  }
+
+  .hidden{
+    display:none !important;
+  }
+
+  .fading{
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .bear-gif{
+    width: clamp(140px, 30vw, 220px);
+    height: auto;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    margin-bottom: 22px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+
+  h1.question{
+    color: var(--text);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    margin: 0 0 30px 0;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .buttons-wrap{
+    display:flex;
+    gap: 22px;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  .btn{
+    border:none;
+    outline:none;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:700;
+    color:#fff;
+    border-radius: 999px;
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 20px var(--shadow-color);
+    background: linear-gradient(135deg, var(--pink-3), var(--pink-4));
+    transition:
+      transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+      width 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+      height 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+      font-size 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.4s ease,
+      border-radius 0.55s ease,
+      box-shadow 0.4s ease;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+  }
+
+  .btn:active{
+    filter: brightness(0.97);
+  }
+
+  .yes-btn{
+    position:relative;
+    z-index: 3;
+  }
+
+  .yes-btn.glow{
+    box-shadow: 0 8px 26px var(--shadow-color), 0 0 30px rgba(255,111,165,0.55);
+  }
+
+  .no-btn{
+    background: linear-gradient(135deg, #ffffff, var(--pink-1));
+    color: var(--pink-4);
+    border: 2px solid var(--pink-2);
+    transition:
+      transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      opacity 0.4s ease,
+      width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      font-size 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* fullscreen takeover state for Yes */
+  .yes-btn.cover{
+    position: fixed;
+    inset: 0;
+    top:0; left:0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    font-size: clamp(2.2rem, 8vw, 4rem);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 999;
+    box-shadow:none;
+    animation: pulse-cover 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-cover{
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.06); }
+  }
+
+  @keyframes pop{
+    0%   { transform: scale(var(--pop-from, 1)); }
+    45%  { transform: scale(var(--pop-mid, 1.15)); }
+    70%  { transform: scale(var(--pop-back, 0.96)); }
+    100% { transform: scale(var(--pop-to, 1)); }
+  }
+
+  .pop-anim{
+    animation: pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  #success-screen h1{
+    color: var(--text);
+    font-size: clamp(1.5rem, 4.5vw, 2.4rem);
+    margin: 6px 0 8px 0;
+  }
+
+  #success-screen p{
+    color: var(--pink-4);
+    font-size: 1.1rem;
+    margin:0;
+    font-weight:600;
+  }
+
+  @media (max-width: 420px){
+    .btn{ padding: 14px 30px; font-size: 1rem; }
+    .buttons-wrap{ gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+
+  <div id="question-screen" class="screen">
+ <img class="bear-gif" id="questionBear"
+  src="https://media.tenor.com/wuasrjM0kNQAAAAi/bubu-dudu-sseeyall.gif"
+  alt="Cute bear">
+    <h1 class="question" id="questionTitle">Kamu sayang aku ga??</h1>
+    <div class="buttons-wrap" id="buttonsWrap">
+      <button class="btn yes-btn" id="yesBtn">YES</button>
+      <button class="btn no-btn" id="noBtn">NO</button>
+    </div>
+  </div>
+
+  <div id="success-screen" class="screen hidden">
+    <img class="bear-gif"
+      src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXN6NGkzbW9wNmkyczU5dWh6eHR6M2c0bm50ZXV3aGdyY3J0Z3g0ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/T86i6yDyOYz7J6dPhf/giphy.gif"
+      alt="Happy bear">
+    <h1>kamuu sayang akuu❤️</h1>
+    <p>Kamu milih yang benarr</p>
+  </div>
+
+<script>
+(function(){
+  var yesBtn = document.getElementById('yesBtn');
+  var noBtn = document.getElementById('noBtn');
+  var questionScreen = document.getElementById('question-screen');
+  var successScreen = document.getElementById('success-screen');
+  var questionBear = document.getElementById('questionBear');
+  var questionTitle = document.getElementById('questionTitle');
+
+  var noClicks = 0;
+  var COVER_THRESHOLD = 6; // clicks on No before Yes takes over the whole screen
+  var isCovering = false;
+
+  // base sizes in px, grown/shrunk via width/height/font-size for crisp scaling
+  var BASE_WIDTH = 150, BASE_HEIGHT = 58, BASE_FONT = 1.1; // rem
+  var MIN_NO_WIDTH = 46, MIN_NO_HEIGHT = 30, MIN_NO_FONT = 0.55;
+
+  function triggerPop(el){
+    el.classList.remove('pop-anim');
+    // force reflow so animation can replay
+    void el.offsetWidth;
+    el.classList.add('pop-anim');
+  }
+
+  function updateSizes(){
+    var step = Math.min(noClicks, COVER_THRESHOLD);
+
+    // Yes grows: gentle curve, faster near the end for drama
+    var growFactor = 1 + step * 0.42;
+    var yesWidth = BASE_WIDTH * growFactor;
+    var yesHeight = BASE_HEIGHT * growFactor;
+    var yesFont = BASE_FONT * growFactor;
+
+    yesBtn.style.width = yesWidth + 'px';
+    yesBtn.style.height = yesHeight + 'px';
+    yesBtn.style.fontSize = yesFont + 'rem';
+
+    // No shrinks, never fully disappears until cover state
+    var shrinkFactor = Math.max(0.28, 1 - step * 0.13);
+    var noWidth = Math.max(MIN_NO_WIDTH, BASE_WIDTH * shrinkFactor);
+    var noHeight = Math.max(MIN_NO_HEIGHT, BASE_HEIGHT * shrinkFactor);
+    var noFont = Math.max(MIN_NO_FONT, BASE_FONT * shrinkFactor);
+
+    noBtn.style.width = noWidth + 'px';
+    noBtn.style.height = noHeight + 'px';
+    noBtn.style.fontSize = noFont + 'rem';
+    noBtn.style.opacity = Math.max(0.35, 1 - step * 0.11);
+
+    if (step >= 3) {
+      yesBtn.classList.add('glow');
+    }
+  }
+
+  function goCoverMode(){
+    isCovering = true;
+    noBtn.style.opacity = '0';
+    noBtn.style.pointerEvents = 'none';
+    questionBear.classList.add('fading');
+    questionTitle.classList.add('fading');
+
+    // clear inline sizing so the .cover class (fixed, 100vw/100vh) takes over smoothly
+    yesBtn.style.width = '';
+    yesBtn.style.height = '';
+    yesBtn.style.fontSize = '';
+    yesBtn.classList.add('cover');
+  }
+
+  function handleNoClick(){
+    if (isCovering) return;
+    noClicks++;
+    triggerPop(yesBtn);
+    updateSizes();
+
+    if (noClicks >= COVER_THRESHOLD) {
+      setTimeout(goCoverMode, 160);
+    }
+  }
+
+  function handleYesClick(){
+    questionScreen.classList.add('hidden');
+    successScreen.classList.remove('hidden');
+  }
+
+  noBtn.addEventListener('click', handleNoClick);
+  yesBtn.addEventListener('click', handleYesClick);
+
+  // keep cover-mode Yes button perfectly full-screen on resize/orientation change
+  window.addEventListener('resize', function(){
+    // no extra work needed: .cover uses vw/vh + fixed inset, stays correct automatically
+  });
+})();
+</script>
+
+</body>
+</html>
